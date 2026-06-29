@@ -238,7 +238,7 @@ function ErrorState({ error }: { error: Error }) {
     <div className="p-6">
       <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
         <p className="text-red-700 font-medium">Error al cargar datos</p>
-        <p className="text-red-500 text-sm mt-1">{error?.message ?? 'Verifica que la API Key y Sheet ID estén configurados en .env.local'}</p>
+        <p className="text-red-500 text-sm mt-1">{error?.message ?? 'Verifica que APPS_SCRIPT_URL esté configurado en .env.local (o en Vercel → Environment Variables)'}</p>
       </div>
     </div>
   );

@@ -1,21 +1,24 @@
 import { Registro, RegistroParsed } from '@/types';
 
-// Parses "dd/mm/yyyy H:mm:ss" → Date
+// Parses date strings in multiple formats from Apps Script / Google Sheets
 export function parseDate(str: string): Date | null {
   if (!str) return null;
-  const parts = str.trim().split(' ');
-  if (parts.length < 1) return null;
-  const [day, month, year] = parts[0].split('/');
-  const [hh, mm, ss] = (parts[1] || '0:0:0').split(':');
-  if (!day || !month || !year) return null;
-  return new Date(
-    parseInt(year),
-    parseInt(month) - 1,
-    parseInt(day),
-    parseInt(hh || '0'),
-    parseInt(mm || '0'),
-    parseInt(ss || '0')
-  );
+  str = str.trim();
+
+  // Format 1: "dd/mm/yyyy H:mm:ss"
+  const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})/);
+  if (m) {
+    return new Date(
+      parseInt(m[3]), parseInt(m[2]) - 1, parseInt(m[1]),
+      parseInt(m[4]), parseInt(m[5]), parseInt(m[6])
+    );
+  }
+
+  // Format 2: Apps Script full date string "Fri Jan 16 2026 08:45:31 GMT-0300 ..."
+  const d = new Date(str);
+  if (!isNaN(d.getTime()) && d.getFullYear() > 1900) return d;
+
+  return null;
 }
 
 export function isToday(d: Date | null): boolean {
@@ -47,18 +50,32 @@ export function formatDate(d: Date | null): string {
   return d.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-// Parses "H:mm:ss" duration → minutes, filters out obvious errors (>20h)
+// Extracts H:mm:ss from either "H:mm:ss" or Apps Script date string
+function extractHMS(str: string): [number, number, number] | null {
+  if (!str) return null;
+  // Format 1: "H:mm:ss"
+  const m1 = str.match(/^(\d+):(\d{2}):(\d{2})/);
+  if (m1) return [parseInt(m1[1]), parseInt(m1[2]), parseInt(m1[3])];
+  // Format 2: Apps Script "... HH:MM:SS GMT..." → extract time from string
+  const m2 = str.match(/\s(\d{1,2}):(\d{2}):(\d{2})\s/);
+  if (m2) return [parseInt(m2[1]), parseInt(m2[2]), parseInt(m2[3])];
+  return null;
+}
+
 export function parseDuracionMinutos(str: string): number {
-  if (!str) return 0;
-  const [hh, mm] = str.split(':').map(Number);
-  if (isNaN(hh) || hh > 20) return 0; // data entry error
-  return hh * 60 + (mm || 0);
+  const hms = extractHMS(str);
+  if (!hms) return 0;
+  const [hh, mm] = hms;
+  if (hh > 20) return 0; // data entry error
+  return hh * 60 + mm;
 }
 
 export function formatDuracion(str: string): string {
   if (!str) return '—';
-  const [hh, mm] = str.split(':').map(Number);
-  if (isNaN(hh) || hh > 20) return 'Error';
+  const hms = extractHMS(str);
+  if (!hms) return '—';
+  const [hh, mm] = hms;
+  if (hh > 20) return 'Error';
   if (hh > 0) return `${hh}h ${mm}m`;
   return `${mm}m`;
 }
