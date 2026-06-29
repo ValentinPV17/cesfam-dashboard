@@ -7,6 +7,7 @@ const links = [
   { href: '/', label: 'Dashboard', icon: '⊞' },
   { href: '/movimientos', label: 'Movimientos', icon: '≡' },
   { href: '/estadisticas', label: 'Estadísticas', icon: '▦' },
+  { href: '/informe', label: 'Generar Informe', icon: '⎙' },
 ];
 
 export default function Sidebar() {
