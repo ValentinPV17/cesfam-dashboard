@@ -8,6 +8,7 @@ const links = [
   { href: '/movimientos', label: 'Movimientos', icon: '≡' },
   { href: '/estadisticas', label: 'Estadísticas', icon: '▦' },
   { href: '/informe', label: 'Generar Informe', icon: '⎙' },
+  { href: '/comparacion', label: 'Comparación', icon: '⇄' },
 ];
 
 export default function Sidebar() {
